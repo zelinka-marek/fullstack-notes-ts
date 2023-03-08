@@ -1,30 +1,26 @@
-import axios from "axios";
 import { FormEvent, useEffect, useState } from "react";
+import { createNote, getAllNotes } from "./services/note";
 import type { Note } from "./types";
 
 export function App() {
-  const [notes, setNotes] = useState<Note[]>([{ id: 1, content: "testing" }]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState("");
 
   useEffect(() => {
-    axios.get<Note[]>("http://localhost:3001/notes").then((response) => {
-      setNotes(response.data);
-    });
+    getAllNotes().then(setNotes);
   }, []);
 
-  const createNote = async (event: FormEvent<HTMLFormElement>) => {
+  const addNewNote = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const response = await axios.post<Note>("http://localhost:3001/notes", {
-      content: newNote,
-    });
-    setNotes((notes) => notes.concat(response.data));
+    const note = await createNote({ content: newNote });
+    setNotes((notes) => notes.concat(note));
     setNewNote("");
   };
 
   return (
     <>
-      <form onSubmit={createNote}>
+      <form onSubmit={addNewNote}>
         <input
           type="text"
           required
